@@ -53,8 +53,7 @@ class Euler{
 			try{
 				System.out.println(str);
 				String ans = input.nextLine();
-				System.out.println();
-				ans = ans.replaceAll("[^xy*\\-\\(\\)+/^0-9\\.sincotaar]+","");
+				ans = ans.replaceAll("[^xy*\\-\\(\\)+/^0-9\\.]+","");
 				validate(ans);
 				return ans;
 			}catch(InputMismatchException e){
@@ -77,11 +76,12 @@ class Euler{
 
 	private static void validate(String str) throws InputMismatchException{
 		checkParen(str);
-		if(str.matches(".*//(//).*"))throw new InputMismatchException();
-		if(str.matches(".*[(][^0-9xy(].*"))throw new InputMismatchException();
+		if(str.isEmpty())throw new InputMismatchException();
+		if(str.matches(".*[\\.][0-9]*[\\.].*"))throw new InputMismatchException();
+		if(str.matches(".*[(][^0-9xy(-].*"))throw new InputMismatchException();
 		if(str.matches(".*[^0-9xy)][)].*"))throw new InputMismatchException();
 		if(str.matches(".*[)][0-9xy].*"))throw new InputMismatchException();
-		if(str.matches(".*[^0-9xy()][^0-9xy\\(\\)].*"))throw new InputMismatchException();
+		if(str.matches(".*[^0-9xy()][^0-9xy()-].*"))throw new InputMismatchException();
 		if(str.matches(".*[xy][0-9].*"))throw new InputMismatchException();
 	}
 
@@ -105,7 +105,6 @@ class Euler{
 	private static double runCalculation(String expression1, double x1, double y1){
 		expression1=expression1.replaceAll("x", String.valueOf(x1));
 		expression1=expression1.replaceAll("y", String.valueOf(y1));
-		System.out.println(expression1);
 		int cursor=expression1.indexOf(')');
 		while(cursor>0){
 			int cursor1=cursor;
@@ -113,22 +112,80 @@ class Euler{
 			expression1=expression1.substring(0,cursor1)+runCalculation(expression1.substring(cursor1+1,cursor),0,0)+(cursor<(expression1.length()-1)?expression1.substring(cursor+1):"");
 			cursor=expression1.indexOf(')');
 		}
-		while(!expression1.matches("[0-9]+[\\.]?[0-9]*")){
+		while(!expression1.matches("[-]?[0-9]+[\\.]?[0-9]*")){
 			while(expression1.indexOf('^')>=0) {
 				cursor=expression1.length()-1;
 				while(expression1.charAt(--cursor)!='^');
 				double base;
 				double exponent;
 				int cursor1=cursor;
-				while(cursor1>=0&&"0123456789.".indexOf(expression1.charAt(cursor1---1))>=0);
-				if((cursor1>1&&expression1.charAt(cursor1-1)=='-'&&"+*/^".indexOf(expression1.charAt(cursor1-2))>=0)||(cursor1==1&&expression1.charAt(cursor1-1)=='-'))cursor--;
+				while(--cursor1>=0&&"0123456789.".indexOf(expression1.charAt(cursor1))>=0);
+				cursor1++;
+				if((cursor1>1&&expression1.charAt(cursor1-1)=='-'&&"+*/^(-".indexOf(expression1.charAt(cursor1-2))>=0)||(cursor1==1&&expression1.charAt(0)=='-'))cursor1--;
 				base=Double.parseDouble(expression1.substring(cursor1,cursor));
-				
+				int cursor2= cursor+1;
+				while(++cursor2<expression1.length()&&"0123456789.".indexOf(expression1.charAt(cursor2))>=0);
+				exponent = Double.parseDouble(expression1.substring(cursor+1,cursor2));
+				double answer = Math.pow(base, exponent);
+				expression1=expression1.substring(0,cursor1)+answer+expression1.substring(cursor2);
+			}
+			while(expression1.indexOf('/')>=0||expression1.indexOf('*')>=0){
+				if(expression1.indexOf('/')<0){
+					cursor=expression1.indexOf('*');
+				}else if(expression1.indexOf('*')<0){
+					cursor=expression1.indexOf('/');
+				}else{
+					cursor=Math.min(expression1.indexOf('/'),expression1.indexOf('*'));
+				}
+				double first;
+				double second;
+				int cursor1=cursor;
+				while(--cursor1>=0&&"0123456789.".indexOf(expression1.charAt(cursor1))>=0);
+				cursor1++;
+				if((cursor1>1&&expression1.charAt(cursor1-1)=='-'&&"+*/^(-".indexOf(expression1.charAt(cursor1-2))>=0)||(cursor1==1&&expression1.charAt(0)=='-'))cursor1--;
+				first=Double.parseDouble(expression1.substring(cursor1,cursor));
+				int cursor2= cursor+1;
+				while(++cursor2<expression1.length()&&"0123456789.".indexOf(expression1.charAt(cursor2))>=0);
+				second = Double.parseDouble(expression1.substring(cursor+1,cursor2));
+				double answer;
+				if(expression1.charAt(cursor)=='*'){
+					answer=first*second;
+				}
+				else{
+					answer=first/second;
+				}
+				expression1=expression1.substring(0,cursor1)+answer+expression1.substring(cursor2);
+			}
+			while(expression1.indexOf('-')>=0||expression1.indexOf('+')>=0){
+				if(expression1.indexOf('-')<0){
+					cursor=expression1.indexOf('+');
+				}else if(expression1.indexOf('+')<0){
+					cursor=expression1.indexOf('-');
+				}else{
+					cursor=Math.min(expression1.indexOf('-'),expression1.indexOf('+'));
+				}
+				double first;
+				double second;
+				int cursor1=cursor;
+				while(--cursor1>=0&&"0123456789.".indexOf(expression1.charAt(cursor1))>=0);
+				cursor1++;
+				if((cursor1>1&&expression1.charAt(cursor1-1)=='-'&&"+*/^(-".indexOf(expression1.charAt(cursor1-2))>=0)||(cursor1==1&&expression1.charAt(0)=='-'))cursor1--;
+				first=Double.parseDouble(expression1.substring(cursor1,cursor));
+				int cursor2= cursor+1;
+				while(++cursor2<expression1.length()&&"0123456789.".indexOf(expression1.charAt(cursor2))>=0);
+				second = Double.parseDouble(expression1.substring(cursor+1,cursor2));
+				double answer;
+				if(expression1.charAt(cursor)=='+'){
+					answer=first+second;
+				}
+				else{
+					answer=first-second;
+				}
+				expression1=expression1.substring(0,cursor1)+answer+expression1.substring(cursor2);
 			}
 			
 		}
-		
-		return 0;
+		return Double.parseDouble(expression1);
 	}
 
 }
