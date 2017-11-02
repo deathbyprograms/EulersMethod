@@ -89,7 +89,7 @@ class Euler{
 		return calculate(x,y,end,expression,divisions);
 	}
 
-	public static double calculate(double x1,double y1,double end1,String expression1,int divisions1){
+	private static double calculate(double x1,double y1,double end1,String expression1,int divisions1){
 		expression1=expression1.replaceAll("([0-9y])x","$1*x");
 		expression1=expression1.replaceAll("x([0-9y\\(])","x*$1");
 		expression1=expression1.replaceAll("([0-9x])y","$1*y");
@@ -102,17 +102,32 @@ class Euler{
 		return y1;
 	}
 
-	public static double runCalculation(String expression1, double x1, double y1){
+	private static double runCalculation(String expression1, double x1, double y1){
 		expression1=expression1.replaceAll("x", String.valueOf(x1));
 		expression1=expression1.replaceAll("y", String.valueOf(y1));
 		System.out.println(expression1);
-		int cursor = 0;
-		cursor=str.indexOf(')');
-		if(cursor>0){
+		int cursor=expression1.indexOf(')');
+		while(cursor>0){
 			int cursor1=cursor;
 			while(expression1.charAt(--cursor1)!='(');
-			expression1=expression1.substring(0,cursor1)+runCalculation(expression1.substring(cursor1+1,cursor),0,0)+cursor<expression1.length()-1?expression1.substring(cursor+1):"";
+			expression1=expression1.substring(0,cursor1)+runCalculation(expression1.substring(cursor1+1,cursor),0,0)+(cursor<(expression1.length()-1)?expression1.substring(cursor+1):"");
+			cursor=expression1.indexOf(')');
 		}
+		while(!expression1.matches("[0-9]+[\\.]?[0-9]*")){
+			while(expression1.indexOf('^')>=0) {
+				cursor=expression1.length()-1;
+				while(expression1.charAt(--cursor)!='^');
+				double base;
+				double exponent;
+				int cursor1=cursor;
+				while(cursor1>=0&&"0123456789.".indexOf(expression1.charAt(cursor1---1))>=0);
+				if((cursor1>1&&expression1.charAt(cursor1-1)=='-'&&"+*/^".indexOf(expression1.charAt(cursor1-2))>=0)||(cursor1==1&&expression1.charAt(cursor1-1)=='-'))cursor--;
+				base=Double.parseDouble(expression1.substring(cursor1,cursor));
+				
+			}
+			
+		}
+		
 		return 0;
 	}
 
